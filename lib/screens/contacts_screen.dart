@@ -15,7 +15,6 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  late final CallLogEntry? callLogEntry;
   List<Contact> allContacts = [];
   List<Contact> filteredAllContacts = [];
   final TextEditingController _searchController = TextEditingController();

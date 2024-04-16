@@ -23,11 +23,34 @@ class _RecentsCallLogScreenState extends State<RecentsCallLogScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    allCallLogs = getAllCallLogs();
+    getAllCallLogEntries();
     _searchController.addListener(() {
     });
   }
+  getAllCallLogEntries()async{
+    Iterable<CallLogEntry> callLogEntries =
+        await CallLog.get();
+    setState(() {
+      entries = callLogEntries.toList();
+    });
+  }
+  void filteredContacts() {
+    Iterable<CallLogEntry> callLogEntries = [];
+    callLogEntries.toList().addAll(entries);
+    if (_searchController.text.isNotEmpty) {
+      callLogEntries.toList().retainWhere(
+            (contact) {
+          String searchTerm = _searchController.text.toLowerCase();
+          String contactName = contact.name!.toLowerCase();
+          return contactName.contains(searchTerm);
+        },
+      );
 
+      setState(() {
+        callLogEntries = entries;
+      });
+    }
+  }
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -91,15 +114,12 @@ class _RecentsCallLogScreenState extends State<RecentsCallLogScreen>
                   future: allCallLogs,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      List<CallLogEntry> entries = snapshot.data!.toList();
                 
                       return ListView.builder(
-                        itemCount: isSearching == true ? null : entries.length,
+                        itemCount: isSearching == true ? filteredEntries.length : entries.length,
                         itemBuilder: (context, index) => CallLogItem(
-                            currentCallLog: isSearching == true ? null : entries.elementAt(index),
-                            onClickInfo: () {
-                              _onClickInfo(context, entries.elementAt(index));
-                            }),
+                            currentCallLog: isSearching == true ? filteredEntries.elementAt(index) : entries.elementAt(index),
+                        ),
                       );
                     } else {
                       return const Center(

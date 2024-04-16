@@ -7,11 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 class CallLogItem extends StatelessWidget {
   const CallLogItem(
-      {super.key, required this.currentCallLog, required this.onClickInfo});
+      {super.key, required this.currentCallLog});
 
   final CallLogEntry? currentCallLog;
 
-  final Function() onClickInfo;
 
   @override
   Widget build(BuildContext context) {
