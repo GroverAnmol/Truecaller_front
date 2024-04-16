@@ -23,11 +23,34 @@ class _RecentsCallLogScreenState extends State<RecentsCallLogScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    allCallLogs = getAllCallLogs();
+    getAllCallLogEntries();
     _searchController.addListener(() {
     });
   }
+  getAllCallLogEntries()async{
+    Iterable<CallLogEntry> callLogEntries =
+        await CallLog.get();
+    setState(() {
+      entries = callLogEntries.toList();
+    });
+  }
+  void filteredContacts() {
+    Iterable<CallLogEntry> callLogEntries = [];
+    callLogEntries.toList().addAll(entries);
+    if (_searchController.text.isNotEmpty) {
+      callLogEntries.toList().retainWhere(
+            (contact) {
+          String searchTerm = _searchController.text.toLowerCase();
+          String contactName = contact.name!.toLowerCase();
+          return contactName.contains(searchTerm);
+        },
+      );
 
+      setState(() {
+        callLogEntries = entries;
+      });
+    }
+  }
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
