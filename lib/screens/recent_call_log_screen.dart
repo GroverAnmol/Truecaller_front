@@ -1,137 +1,143 @@
-import 'package:flutter/cupertino.dart';
-import 'package:untitled36/screens/call_log_details_screen.dart';
-import 'package:untitled36/widgets/call_log_item.dart';
-import 'package:flutter/material.dart';
-import 'package:untitled36/helpers.dart';
+
 import 'package:call_log/call_log.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/material.dart';
 
 import '../custom_colors.dart';
+import '../widgets/call_log_item.dart';
 
 class RecentsCallLogScreen extends StatefulWidget {
-  const RecentsCallLogScreen({super.key});
+  final Iterable<CallLogEntry> allCallLogs;
+  final List<CallLogEntry> entry;
+
+  RecentsCallLogScreen({Key? key, required this.allCallLogs
+    ,required this.entry
+  }) : super(key: key);
+
   @override
   State<RecentsCallLogScreen> createState() => _RecentsCallLogScreenState();
 }
 
-class _RecentsCallLogScreenState extends State<RecentsCallLogScreen>
-    with WidgetsBindingObserver {
-  late Future<Iterable<CallLogEntry>> allCallLogs;
+class _RecentsCallLogScreenState extends State<RecentsCallLogScreen> {
   TextEditingController _searchController = TextEditingController();
+  // List<Contact> allContacts = [];
+  // List<Contact> filteredAllContacts = [];
   List<CallLogEntry> entries = [];
   List<CallLogEntry> filteredEntries = [];
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    getAllCallLogEntries();
-    _searchController.addListener(() {
-    });
-  }
+
   getAllCallLogEntries()async{
     Iterable<CallLogEntry> callLogEntries =
-        await CallLog.get();
+    await CallLog.get();
     setState(() {
       entries = callLogEntries.toList();
     });
   }
-  void filteredContacts() {
-    Iterable<CallLogEntry> callLogEntries = [];
-    callLogEntries.toList().addAll(entries);
+  /* void filteredContacts() {
+    List<CallLogEntry> callLogEntries = entries.toList();
     if (_searchController.text.isNotEmpty) {
-      callLogEntries.toList().retainWhere(
-            (contact) {
-          String searchTerm = _searchController.text.toLowerCase();
-          String contactName = contact.name!.toLowerCase();
-          return contactName.contains(searchTerm);
-        },
-      );
+      callLogEntries = callLogEntries.where((log) {
+        String searchTerm = _searchController.text.toLowerCase();
+        String logName = log.name?.toLowerCase() ?? '';
+        return logName.contains(searchTerm);
+      }).toList();
 
       setState(() {
-        callLogEntries = entries;
+        filteredEntries = callLogEntries;
       });
-    }
-  }
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
+    } else {
       setState(() {
-        allCallLogs = getAllCallLogs();
+        filteredEntries = [];
       });
     }
+  }*/
+  void filteredContacts() async{
+    List<CallLogEntry> callLogEntries = entries.toList();
+    if (_searchController.text.isNotEmpty) {
+      callLogEntries = callLogEntries.where((log) {
+        String searchTerm = _searchController.text.toLowerCase();
+        String logName = log.name?.toLowerCase() ?? '';
+        return logName.contains(searchTerm);
+      }).toList();
+    }
+
+    else {
+      Iterable<CallLogEntry> callLogEntries =
+      await CallLog.get();
+      setState(() {
+        entries = callLogEntries.toList();
+      });
+    }
+
+    setState(() {
+      filteredEntries = callLogEntries;
+    });
   }
 
-  void _onClickInfo(BuildContext context, CallLogEntry callLog) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (ctx) => CallLogDetailsScreen(callLog: callLog),
-        ));
+
+
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    print('entries ${entries.length}');
+    print('filtered entries $filteredEntries');
+    getAllCallLogEntries();
+    filteredContacts();
+    _searchController.text = '';
+    super.initState();
   }
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     bool isSearching = _searchController.text.isNotEmpty;
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          backgroundColor: Color(appBarColor),
-          title: const Text('Recents'),
-        ),
-        body: Container(
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    label: Text(
-                      'Search',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide:
-                      BorderSide(color: Theme.of(context).colorScheme.primary),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
+    print('234-> $isSearching');
+    // Use allCallLogs here to display the recent call logs
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(appBarColor),
+        title: const Text('Recents'),),
+      body: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              label: Text(
+                'Search',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              Expanded(
-                child: FutureBuilder(
-                  future: allCallLogs,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                
-                      return ListView.builder(
-                        itemCount: isSearching == true ? filteredEntries.length : entries.length,
-                        itemBuilder: (context, index) => CallLogItem(
-                            currentCallLog: isSearching == true ? filteredEntries.elementAt(index) : entries.elementAt(index),
-                        ),
-                      );
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
-                ),
+              border: OutlineInputBorder(
+                borderSide:
+                BorderSide(color: Theme.of(context).colorScheme.primary),
               ),
-            ],
+              prefixIcon: Icon(
+                Icons.search,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            onChanged: (value){
+              filteredContacts ;
+            },
+            onSubmitted: (_) {
+              filteredContacts();
+            },
           ),
-        ),
+          Expanded(
+            child: ListView.builder(
+              itemCount:  isSearching == true ? filteredEntries.length : widget.entry.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) => CallLogItem(
+                currentCallLog: isSearching == true ? filteredEntries.elementAt(index) : widget.entry.elementAt(index),
+
+
+              ),
+
+            ),
+          ),
+
+        ],
       ),
     );
   }

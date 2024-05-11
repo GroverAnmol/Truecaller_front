@@ -24,7 +24,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     super.initState();
     getAllContacts();
     _searchController.addListener(() {
-      filteredContacts();
+      // filteredContacts();
     });
   }
 
@@ -36,7 +36,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     });
   }
 
-  void filteredContacts() {
+  /*void filteredContacts() {
     List<Contact> contacts = [];
     contacts.addAll(allContacts);
     if (_searchController.text.isNotEmpty) {
@@ -52,6 +52,29 @@ class _ContactsScreenState extends State<ContactsScreen> {
         filteredAllContacts = contacts;
       });
     }
+  }*/
+  void filteredContacts() {
+    List<Contact> contacts = []; // Initialize a list to hold filtered contacts
+    contacts.addAll(allContacts); // Copy all contacts to the filtered list
+
+    // If search text is not empty, filter contacts based on the search term
+    if (_searchController.text.isNotEmpty) {
+      contacts.retainWhere((contact) {
+        String searchTerm = _searchController.text.toLowerCase();
+        if(contact.displayName != null ) {
+          String contactName = contact.displayName!.toLowerCase();
+          return contactName.contains(searchTerm);
+        }
+        else {
+          return false ;
+        }
+      });
+    }
+
+    // Update the filtered contacts list
+    setState(() {
+      filteredAllContacts = contacts;
+    });
   }
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -87,6 +110,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
+                onChanged: (value){
+                  filteredContacts ;
+                },
+                onSubmitted: (_) {
+                  filteredContacts();
+                },
               ),
               Expanded(
                 child: ListView.builder(
@@ -94,7 +123,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       ? filteredAllContacts.length
                       : allContacts.length,
                   itemBuilder: (context, index) => ContactsItem(
-                    currentCallLog: null,
+                      currentCallLog: null,
                       currentContact: isSearching == true
                           ? filteredAllContacts[index]
                           : allContacts[index]),

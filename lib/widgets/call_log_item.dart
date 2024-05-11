@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:untitled36/custom_colors.dart';
 import 'package:untitled36/helpers.dart';
 import 'package:call_log/call_log.dart';
@@ -5,21 +6,41 @@ import 'package:flutter/material.dart';
 import 'package:untitled36/screens/call_log_details_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CallLogItem extends StatelessWidget {
+class CallLogItem extends StatefulWidget {
   const CallLogItem(
-      {super.key, required this.currentCallLog});
+      {super.key, required this.currentCallLog ,
+      });
 
   final CallLogEntry? currentCallLog;
 
 
   @override
+  State<CallLogItem> createState() => _CallLogItemState();
+}
+
+class _CallLogItemState extends State<CallLogItem> {
+
+
+  @override
   Widget build(BuildContext context) {
+    log('19>> ${widget.currentCallLog}');
     return ListTile(
-      leading: CircleAvatar(
+
+      leading:( widget.currentCallLog?.name !=null) && (widget.currentCallLog?.name !='') ?
+      CircleAvatar(
         backgroundColor: Color(circleAvatarColor),
         radius: 24,
-        child: Text(
-          getAvatorTitle(currentCallLog!),
+        child: Text('${widget.currentCallLog?.name?.substring(0,2)}',
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              color:Colors.black,
+              fontWeight: FontWeight.w300
+
+          ),
+        ),
+      ):CircleAvatar(
+        backgroundColor: Color(circleAvatarColor),
+        radius: 24,
+        child: Text('+91',
           style: Theme.of(context).textTheme.titleMedium!.copyWith(
               color:Colors.black,
               fontWeight: FontWeight.w300
@@ -29,33 +50,33 @@ class CallLogItem extends StatelessWidget {
       ),
       title: Padding(
           padding: const EdgeInsets.only(bottom: 2),
-          child: (currentCallLog!.name == null || currentCallLog!.name!.isEmpty) ? GestureDetector(
+          child: (widget.currentCallLog!.name == null || widget.currentCallLog!.name!.isEmpty) ? GestureDetector(
             onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context){
-                return CallLogDetailsScreen(callLog: currentCallLog!);
+                return CallLogDetailsScreen(callLog: widget.currentCallLog!);
               }));
             },
             child: Text(
-              "${currentCallLog!.number}",
+              "${widget.currentCallLog!.number}",
             ),
           ):
           GestureDetector(
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return CallLogDetailsScreen(callLog: currentCallLog!);
+                  return CallLogDetailsScreen(callLog: widget.currentCallLog!);
                 }));
               },
-              child: Text("${currentCallLog!.name}",style: Theme.of(context).textTheme.bodyLarge,))
+              child: Text("${widget.currentCallLog!.name}",style: Theme.of(context).textTheme.bodyLarge,))
       ),
       subtitle: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          getCallTypeIcon(currentCallLog!.callType!),
+          getCallTypeIcon(widget.currentCallLog!.callType!),
           const SizedBox(
             width: 3,
           ),
           Text(
-            formatDate(currentCallLog!.timestamp!),
+            formatDate(widget.currentCallLog!.timestamp!),
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 11
@@ -73,7 +94,7 @@ class CallLogItem extends StatelessWidget {
                 onTap: () async {
                   final Uri url = Uri(
                     scheme: 'tel',
-                    path: "${(currentCallLog!.number!.toString())}",
+                    path: "${(widget.currentCallLog!.number!.toString())}",
                   );
                   if (await canLaunchUrl(url)){
                     await launchUrl(url);
@@ -90,7 +111,7 @@ class CallLogItem extends StatelessWidget {
               onPressed: () async {
                 final Uri url = Uri(
                   scheme: 'tel',
-                  path: "${(currentCallLog!.number!.toString())}",
+                  path: "${(widget.currentCallLog!.number!.toString())}",
                 );
                 if (await canLaunchUrl(url)){
                   await launchUrl(url);
@@ -105,13 +126,13 @@ class CallLogItem extends StatelessWidget {
             ),),
           )),
           PopupMenuItem(child: Padding(
-    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
             child: ListTile(
               leading:GestureDetector(
                 onTap: () async {
                   final Uri url = Uri(
                     scheme: 'sms',
-                    path: "${(currentCallLog!.number!.toString())}",
+                    path: "${(widget.currentCallLog!.number!.toString())}",
                   );
                   if (await canLaunchUrl(url)){
                     await launchUrl(url);
@@ -130,7 +151,7 @@ class CallLogItem extends StatelessWidget {
               onPressed: () async {
                 final Uri url = Uri(
                   scheme: 'sms',
-                  path: "${(currentCallLog!.number!.toString())}",
+                  path: "${(widget.currentCallLog!.number!.toString())}",
                 );
                 if (await canLaunchUrl(url)){
                   await launchUrl(url);
@@ -168,7 +189,7 @@ class CallLogItem extends StatelessWidget {
               leading:GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context){
-                    return CallLogDetailsScreen(callLog: currentCallLog!);
+                    return CallLogDetailsScreen(callLog: widget.currentCallLog!);
                   }));
                 },
                 child: Text("Details",style: TextStyle(
@@ -180,7 +201,7 @@ class CallLogItem extends StatelessWidget {
               ),trailing: IconButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return CallLogDetailsScreen(callLog: currentCallLog!);
+                  return CallLogDetailsScreen(callLog: widget.currentCallLog!);
                 }));
               },
               icon: const Icon(

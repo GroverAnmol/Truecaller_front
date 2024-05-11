@@ -1,3 +1,4 @@
+import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled36/screens/contacts_screen.dart';
 import 'package:untitled36/screens/dial_screen.dart';
@@ -13,6 +14,7 @@ class TabsScreen extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsScreen> {
   int _selectedPageIndex = 0;
+  Iterable<CallLogEntry> _allCallLogs = [];
 
   void _selectPage(int index) {
     setState(() {
@@ -21,10 +23,36 @@ class _TabsScreenState extends State<TabsScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //_fetchAllCallLogs();
+    _fetchAllCallLogs();
+    getAllCallLogEntries();
+  }
+  List<CallLogEntry> entries = [];
+  Future<void> _fetchAllCallLogs() async {
+    final Iterable<CallLogEntry> callLogs = await CallLog.query();
+    setState(() {
+      _allCallLogs = callLogs;
+    });
+  }
+  getAllCallLogEntries()async{
+    Iterable<CallLogEntry> callLogEntries =
+    await CallLog.get();
+    setState(() {
+      entries = callLogEntries.toList();
+    });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     Widget activePage = DialScreen();
     if (_selectedPageIndex == 1) {
-      activePage = const RecentsCallLogScreen();
+      activePage =  RecentsCallLogScreen(allCallLogs: _allCallLogs
+        ,entry: entries,
+      );
     } else if (_selectedPageIndex == 2){
       activePage = const ContactsScreen();
     }
