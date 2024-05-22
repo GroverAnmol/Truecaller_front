@@ -111,7 +111,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   ),
                 ),
                 onChanged: (value){
-                  filteredContacts ;
+                  filteredContacts() ;
                 },
                 onSubmitted: (_) {
                   filteredContacts();
